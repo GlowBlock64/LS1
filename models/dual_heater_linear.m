@@ -44,7 +44,7 @@ else
 end
 
 %% Definice parametrů pro model v přírůstkových souřadnicích
-mat_A = [-K1-4*K2*T10^3-4*K4*T10^3-K3, K3+4*K4*T20^3; K3+4*K4*T10^3, -K1-4*K2*T20^3-4*K4*T20^3-K3];
+mat_A = [-K1-(4*K2*T10^3)-(4*K4*T10^3)-K3, K3+(4*K4*T20^3); K3+(4*K4*T10^3), -K1-(4*K2*T20^3)-(4*K4*T20^3)-K3];
 mat_B = [Ku1, 0; 0, Ku2];
 mat_C = [1, 0; 0, 1];
 
