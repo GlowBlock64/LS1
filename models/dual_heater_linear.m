@@ -71,13 +71,6 @@ p2 = pole(F2);
 z2 = zero(F2);
 G2 = dcgain(F2);
 
-figure;
-bode(F1)
-figure;
-nyquist(F1)
-figure;
-rlocus(F1)
-
 %% Přechodová a impulsní charakteristika F1
 
 % Časová osa
@@ -113,6 +106,70 @@ ylabel('Response');
 legend;
 grid;
 
+%% Bodeho a Nyquistova frekvenční charakteristika
+
+t = 0:0.001:10000;
+amplitudes = [1, 1, 1, 1];
+frequencies = [2*pi*0.0005, 2*pi*0.001, 2*pi*0.005, 2*pi*0.01];
+gains = [];
+phases = [];
+phases_deg = [];
+
+for i=1:4
+    u = [amplitudes(i)*sin(frequencies(i)*t)]; % Generování harmonického vstupu
+    [y, ~] = lsim(F1, u, t);
+    %figure;
+    %plot(y) % Vykreslení odezvy
+
+    % Amplituda odezvy
+    y_centered = y - mean(y);
+    amplitude_out = max(abs(y_centered));
+    gain = amplitude_out / amplitudes(i);
+
+    % Fáze odezvy
+    [~, index_in] = max(diff(u >= 0));
+    [~, index_out] = max(diff(y_centered >= 0));
+    time_shift = t(index_out) - t(index_in);
+    phi = time_shift * frequencies(i);
+    phi_deg = mod(phi * (180/pi) + 180, 360) - 180;
+
+    % Výsledky
+    disp(['Zisk (dB): ', num2str(20*log10(gain))]);
+    disp(['Fáze (°): ', num2str(phi_deg)]);
+
+    gains = [gains, gain];
+    phases = [phases, phi];
+    phases_deg = [phases_deg, phi_deg];
+end
+
+
+bode_gains = 20*log10(gains);
+bode_phases = phases_deg;
+
+nyquist_real = gains.*cos(phases);
+nyquist_imag = gains.*sin(phases);
+
+[mag, phase, omega] = bode(F1);
+mag = squeeze(mag);
+phase = squeeze(phase);
+omega = squeeze(omega);
+
+figure; % Bode
+subplot(2, 1, 1)
+hold on;
+plot(omega, 20*log10(mag))
+scatter(frequencies, bode_gains)
+set(gca,'xscale','log')
+subplot(2, 1, 2)
+hold on;
+plot(omega, phase)
+scatter(frequencies, bode_phases)
+set(gca,'xscale','log')
+
+figure; % Nyquist
+hold on;
+nyquist(F1)
+scatter(nyquist_real, nyquist_imag)
 %%
 tclab;
 figure(1)
