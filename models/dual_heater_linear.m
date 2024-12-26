@@ -49,10 +49,70 @@ mat_C = [1, 0; 0, 1];
 
 simOut = sim(model);
 figure;
-plot(simOut.simout);
+plot(simOut.dualHeaterLinear);
 title('Teplota topného tělesa');
 xlabel('Čas (s)');
 ylabel('Teplota (C)');
+
+%% Definice přenosových funkcí F1 a F2
+
+numerator1 = [mat_B(1,1), -mat_B(1,1)*mat_A(1,2)];
+numerator2 = [mat_B(2,2)*mat_A(1,2)];
+denominator = [1, -(mat_A(1,1)+mat_A(2,2)), det(mat_A)];
+F1 = tf(numerator1, denominator);
+F2 = tf(numerator2, denominator);
+F1
+F2
+
+p1 = pole(F1);
+z1 = zero(F1);
+G1 = dcgain(F1);
+p2 = pole(F2);
+z2 = zero(F2);
+G2 = dcgain(F2);
+
+figure;
+bode(F1)
+figure;
+nyquist(F1)
+figure;
+rlocus(F1)
+
+%% Přechodová a impulsní charakteristika F1
+
+% Časová osa
+t = 0:0.01:2000;
+
+% Vypočtená přechodová odezva
+y_step = (((p1(1)-mat_A(1,2))*mat_B(1,1))/(p1(1)*(p1(1)-p1(2))))*exp(p1(1)*t) + (((p1(2)-mat_A(1,2))*mat_B(1,1))/(p1(2)*(p1(2)-p1(1))))*exp(p1(2)*t) + ((-mat_A(1,2)*mat_B(1,1))/(p1(1)*p1(2)));
+
+% Vypočtená impulsní odezva
+y_impulse = (((p1(1)-mat_A(1,2))*mat_B(1,1))/(p1(1)-p1(2)))*exp(p1(1)*t) + (((p1(2)-mat_A(1,2))*mat_B(1,1))/(p1(2)-p1(1)))*exp(p1(2)*t);
+
+% Simulace přechodové odezvy
+[y_step_num, t_step_num] = step(F1, t);
+
+% Simulace impulsní odezvy
+[y_impulse_num, t_impulse_num] = impulse(F1, t);
+
+% Zobrazení výsledků
+figure;
+hold on;
+plot(t, y_step, 'b', 'DisplayName', 'Step response characteristics');
+plot(t, y_impulse, 'r', 'DisplayName', 'Impulse response characteristics');
+xlabel('Time (s)');
+ylabel('Response');
+legend;
+grid;
+figure;
+hold on;
+plot(t, y_step_num, 'b', 'DisplayName', 'Step response simulation');
+plot(t, y_impulse_num, 'r', 'DisplayName', 'Impulse response simulation'); 
+xlabel('Time (s)');
+ylabel('Response');
+legend;
+grid;
+
 %%
 tclab;
 figure(1)
