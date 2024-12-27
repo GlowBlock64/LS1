@@ -106,6 +106,18 @@ ylabel('Response');
 legend;
 grid;
 
+%% Frobeniova a Jordanova Stavová forma
+
+A_frob = [0,1;denominator(3),denominator(2)];
+B_frob = [0;1];
+C_frob = [numerator1(2),numerator1(1)];
+D_frob = 0;
+[V,J]=eig(A_frob)
+Aj = inv(V)*A_frob*V;
+Bj = inv(V)*B_frob;
+Cj = C_frob*V;
+Dj = D_frob;
+
 %% Bodeho a Nyquistova frekvenční charakteristika
 
 t = 0:0.0005:10000;
