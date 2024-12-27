@@ -106,6 +106,41 @@ ylabel('Response');
 legend;
 grid;
 
+%% Vnitřní popis ve Frobeniově a Jordanovo normální formě
+
+% Frobeniova forma (stavový popis)
+A_F = [0, 1; -det(mat_A), mat_A(1,1)+mat_A(2,2)];
+B_F = [0; 1];
+C_F = [-mat_B(1,1)*mat_A(2,2), mat_B(1,1)];
+D_F = 0;
+
+% Jordanova forma (stavový popis)
+[V, A_J] = eig(A_F);
+B_J = V\B_F;
+C_J = C_F*V;
+D_J = 0;
+
+F1_F = ss(A_F, B_F, C_F, D_F); % Frobeniova forma
+F1_J = ss(A_J, B_J, C_J, D_J); % Jordanova forma
+
+t = 0:0.01:10;
+u = sin(t); % Sinusový signál
+[y_tf, t_tf] = lsim(F1, u, t);
+[y_F, t_F] = lsim(F1_F, u, t);
+[y_J, t_J] = lsim(F1_J, u, t);
+
+figure;
+hold on;
+%plot(t, u, 'y', 'DisplayName', 'Vstup', 'LineWidth', 1);
+plot(t_tf, y_tf, 'r', 'DisplayName', 'Vnější popis', 'LineWidth', 1);
+plot(t_F, y_F, 'g--', 'DisplayName', 'Frobeniova forma', 'LineWidth', 1);
+plot(t_J, y_J, 'b-.', 'DisplayName', 'Jordanova forma', 'LineWidth', 1);
+title('Porovnání vstupně/výstupního chování systému');
+xlabel('Čas (s)');
+ylabel('Výstup');
+legend('show');
+grid on;
+
 %% Bodeho a Nyquistova frekvenční charakteristika
 
 t = 0:0.0005:10000;
