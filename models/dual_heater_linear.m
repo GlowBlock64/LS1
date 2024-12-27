@@ -56,7 +56,7 @@ ylabel('Teplota (C)');
 
 %% Definice přenosových funkcí F1 a F2
 
-numerator1 = [mat_B(1,1), -mat_B(1,1)*mat_A(1,2)];
+numerator1 = [mat_B(1,1), -mat_B(1,1)*mat_A(2,2)];
 numerator2 = [mat_B(2,2)*mat_A(1,2)];
 denominator = [1, -(mat_A(1,1)+mat_A(2,2)), det(mat_A)];
 F1 = tf(numerator1, denominator);
@@ -77,10 +77,10 @@ G2 = dcgain(F2);
 t = 0:0.01:2000;
 
 % Vypočtená přechodová odezva
-y_step = (((p1(1)-mat_A(1,2))*mat_B(1,1))/(p1(1)*(p1(1)-p1(2))))*exp(p1(1)*t) + (((p1(2)-mat_A(1,2))*mat_B(1,1))/(p1(2)*(p1(2)-p1(1))))*exp(p1(2)*t) + ((-mat_A(1,2)*mat_B(1,1))/(p1(1)*p1(2)));
+y_step = (((p1(1)-mat_A(2,2))*mat_B(1,1))/(p1(1)*(p1(1)-p1(2))))*exp(p1(1)*t) + (((p1(2)-mat_A(2,2))*mat_B(1,1))/(p1(2)*(p1(2)-p1(1))))*exp(p1(2)*t) + ((-mat_A(2,2)*mat_B(1,1))/(p1(1)*p1(2)));
 
 % Vypočtená impulsní odezva
-y_impulse = (((p1(1)-mat_A(1,2))*mat_B(1,1))/(p1(1)-p1(2)))*exp(p1(1)*t) + (((p1(2)-mat_A(1,2))*mat_B(1,1))/(p1(2)-p1(1)))*exp(p1(2)*t);
+y_impulse = (((p1(1)-mat_A(2,2))*mat_B(1,1))/(p1(1)-p1(2)))*exp(p1(1)*t) + (((p1(2)-mat_A(2,2))*mat_B(1,1))/(p1(2)-p1(1)))*exp(p1(2)*t);
 
 % Simulace přechodové odezvy
 [y_step_num, t_step_num] = step(F1, t);
@@ -108,7 +108,7 @@ grid;
 
 %% Bodeho a Nyquistova frekvenční charakteristika
 
-t = 0:0.001:10000;
+t = 0:0.0005:10000;
 amplitudes = [1, 1, 1, 1];
 frequencies = [2*pi*0.0005, 2*pi*0.001, 2*pi*0.005, 2*pi*0.01];
 gains = [];
@@ -117,21 +117,27 @@ phases_deg = [];
 
 for i=1:4
     u = [amplitudes(i)*sin(frequencies(i)*t)]; % Generování harmonického vstupu
+    u = u(t > 2000); % Odříznutí přechodového děje
+    t = t(t > 2000); % Odříznutí přechodového děje
     [y, ~] = lsim(F1, u, t);
-    %figure;
-    %plot(y) % Vykreslení odezvy
+
+    %figure; hold on;
+    %plot(t, u) % Vykreslení vstupu
+    %plot(t, y) % Vykreslení odezvy
+    %legend("Vstup", "Výstup")
 
     % Amplituda odezvy
-    y_centered = y - mean(y);
-    amplitude_out = max(abs(y_centered));
+    amplitude_out = max(abs(y)) - mean(y); % Odečtení průměru (pokud není signál vycentrovaný kolem nuly)
     gain = amplitude_out / amplitudes(i);
 
     % Fáze odezvy
-    [~, index_in] = max(diff(u >= 0));
-    [~, index_out] = max(diff(y_centered >= 0));
-    time_shift = t(index_out) - t(index_in);
-    phi = time_shift * frequencies(i);
-    phi_deg = mod(phi * (180/pi) + 180, 360) - 180;
+    fft_u = fft(u);
+    fft_y = fft(y);
+    [~, idx] = max(abs(fft_u));
+    phase_u = angle(fft_u(idx));
+    phase_y = angle(fft_y(idx));
+    phi = phase_y - phase_u;
+    phi_deg = rad2deg(phi);
 
     % Výsledky
     disp(['Zisk (dB): ', num2str(20*log10(gain))]);
@@ -158,18 +164,29 @@ figure; % Bode
 subplot(2, 1, 1)
 hold on;
 plot(omega, 20*log10(mag))
-scatter(frequencies, bode_gains)
+scatter(frequencies, bode_gains, "xr")
 set(gca,'xscale','log')
+title("Bodeho charakteristika")
+legend("", "Odsimulované vstupy")
+xlabel("Frekvence (rad/s)")
+ylabel("Amplituda (dB)")
 subplot(2, 1, 2)
 hold on;
 plot(omega, phase)
-scatter(frequencies, bode_phases)
+scatter(frequencies, bode_phases, "xr")
 set(gca,'xscale','log')
+legend("", "Odsimulované vstupy")
+xlabel("Frekvence (rad/s)")
+ylabel("Fáze (°)")
 
 figure; % Nyquist
 hold on;
 nyquist(F1)
-scatter(nyquist_real, nyquist_imag)
+scatter(nyquist_real, nyquist_imag, "xr")
+title("Nyquistova charakteristika")
+legend("", "Odsimulované vstupy")
+xlabel("Reálná složka")
+ylabel("Imaginární složka")
 %%
 tclab;
 figure(1)
