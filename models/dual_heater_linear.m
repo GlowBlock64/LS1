@@ -106,19 +106,17 @@ ylabel('Response');
 legend;
 grid;
 
-%% Vnitřní popis ve Frobeniově a Jordanovo normální formě
+%% Frobeniova a Jordanova Stavová forma
 
-% Frobeniova forma (stavový popis)
-A_F = [0, 1; -det(mat_A), mat_A(1,1)+mat_A(2,2)];
-B_F = [0; 1];
-C_F = [-mat_B(1,1)*mat_A(2,2), mat_B(1,1)];
+A_F = [0,1;denominator(3),denominator(2)];
+B_F = [0;1];
+C_F = [numerator1(2),numerator1(1)];
 D_F = 0;
-
-% Jordanova forma (stavový popis)
-[V, A_J] = eig(A_F);
-B_J = V\B_F;
+[V,J]=eig(A_F)
+A_J = inv(V)*A_F*V;
+B_J = inv(V)*B_F;
 C_J = C_F*V;
-D_J = 0;
+D_J = D_F;
 
 F1_F = ss(A_F, B_F, C_F, D_F); % Frobeniova forma
 F1_J = ss(A_J, B_J, C_J, D_J); % Jordanova forma
