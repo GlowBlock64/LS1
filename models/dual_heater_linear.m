@@ -91,18 +91,18 @@ y_impulse = (((p1(1)-mat_A(2,2))*mat_B(1,1))/(p1(1)-p1(2)))*exp(p1(1)*t) + (((p1
 % Zobrazení výsledků
 figure;
 hold on;
-plot(t, y_step, 'b', 'DisplayName', 'Step response characteristics');
-plot(t, y_impulse, 'r', 'DisplayName', 'Impulse response characteristics');
-xlabel('Time (s)');
-ylabel('Response');
+plot(t, y_step, 'b', 'DisplayName', 'Přechodová charakteristika');
+plot(t, y_impulse, 'r', 'DisplayName', 'Impulsní charakteristika');
+xlabel('čas (s)');
+ylabel('Odezva');
 legend;
 grid;
 figure;
 hold on;
-plot(t, y_step_num, 'b', 'DisplayName', 'Step response simulation');
-plot(t, y_impulse_num, 'r', 'DisplayName', 'Impulse response simulation'); 
-xlabel('Time (s)');
-ylabel('Response');
+plot(t, y_step_num, 'b', 'DisplayName', 'Simulace přechodové odezvy');
+plot(t, y_impulse_num, 'r', 'DisplayName', 'Simulace impulsní odezvy'); 
+xlabel('čas (s)');
+ylabel('Odezva');
 legend;
 grid;
 

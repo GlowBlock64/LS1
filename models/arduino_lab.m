@@ -1,4 +1,4 @@
-function TC = arduino_lab1(heater)
+function TC = arduino_lab(heater)
 
 persistent icount a
 

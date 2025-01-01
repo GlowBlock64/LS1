@@ -25,7 +25,7 @@ Ku1 = alfa/(m*cp);
 Ku2 = alfa2/(m*cp);
 simOut = sim(model);
 figure;
-plot(simOut.simout);
+plot(simOut.dualHeater);
 title('Teplota topného tělesa');
 xlabel('Čas (s)');
 ylabel('Teplota (C)');
